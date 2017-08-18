@@ -1161,8 +1161,6 @@ public class NewChunk extends Chunk {
     if(sparse){ // sparse?  then compare vs implied 0s
       if( min > 0 ) { min = 0; llo=0; xlo=0; }
       if( max < 0 ) { max = 0; lhi=0; xhi=0; }
-//       xmin = Math.min(xmin,0);
-
     }
     // Constant column?
     if( _naCnt==0 && (min==max)) {
@@ -1173,7 +1171,7 @@ public class NewChunk extends Chunk {
       else
         return new C0DChunk(min, _len);
     }
-
+    if(min == max && min == 0) xmin = 0;
     // Compute min & max, as scaled integers in the xmin scale.
     // Check for overflow along the way
     boolean overflow = ((xhi-xmin) >= p10iLength) || ((xlo-xmin) >= p10iLength);
