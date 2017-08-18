@@ -164,10 +164,13 @@ public class C1SChunkTest extends TestUtil {
     vec.remove();
   }
 
+
   @Test
   public void test_precision() {
     int[] exponents = new int[]{/*-32,*/-16,-8,-6,-4, -2, -1, 0, 1, 2, 4, 6,8,16/*,32*/};
     long[] biases = new long[]{-1234567,-12345, -1234,-1, 0,1, 1234, 12345,1234567};
+    int deccnt = 0;
+    int cnt = 0;
     for (int exponent : exponents) {
       for (long bias : biases) {
         if(exponent == 0 && 1 >= Math.abs(bias)) continue;
@@ -178,13 +181,46 @@ public class C1SChunkTest extends TestUtil {
           expected[i] = Double.parseDouble((i + bias) + "e" + exponent);
         }
         Chunk c = nc.compress();
-        if(!(c instanceof C1SChunk))
+        if(!(c instanceof C1SChunk) && !(c instanceof CDecimalChunk))
           System.out.println("exp = " + exponent + " b = " + bias + " c = " + c.getClass().getSimpleName());
-        Assert.assertTrue(c instanceof C1SChunk);
+        Assert.assertTrue(c instanceof C1SChunk || c instanceof  CDecimalChunk);
+        if(c instanceof CDecimalChunk) deccnt++; else cnt++;
         for (int i = 0; i < expected.length; ++i) {
           Assert.assertEquals(expected[i], c.atd(i), 0);
         }
       }
+    }
+    System.out.println("There were " + deccnt + " dec chunks vs " + cnt + " regular c1s chunks");
+  }
+
+  @Test @Ignore
+  public void test_performance() {
+    int[] exponents = new int[]{/*-32,*/-16, -8, -6, -4, -2, -1, 0, 1, 2, 4, 6, 8, 16/*,32*/};
+    long[] biases = new long[]{-1234567, -12345, -1234,  1, 1234, 12345, 1234567};
+    for(int x = 0; x < 3; ++x) {
+      long tsum = 0;
+      long tmin = Long.MAX_VALUE;
+      double sum = 0;
+      for (int exponent : exponents) {
+        for (long bias : biases) {
+          if (exponent == 0 && 1 >= Math.abs(bias)) continue;
+          NewChunk nc = new NewChunk(null, 0);
+          for (int i = 0; i < 1000000; ++i)
+            nc.addNum(bias + (i%255), exponent);
+          Chunk c = nc.compress();
+          if (!(c instanceof C1SChunk))
+            System.out.println("exp = " + exponent + " b = " + bias + " c = " + c.getClass().getSimpleName());
+          Assert.assertTrue(c instanceof C1SChunk);
+          long t0 = System.currentTimeMillis();
+          for (int i = 0; i < c._len; ++i)
+              sum += c.atd(i);
+          long t1 = System.currentTimeMillis();
+          long t = t1 - t0;
+          tsum += t;
+          if (t < tmin) tmin = t;
+        }
+      }
+      System.out.println("tsum = " + tsum + ", tmin = " + tmin + "ms" + ", sum = " + sum);
     }
   }
 

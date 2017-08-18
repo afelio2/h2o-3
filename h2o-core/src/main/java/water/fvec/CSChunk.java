@@ -7,10 +7,9 @@ import water.util.UnsafeUtils;
  * Created by tomas on 8/14/17.
  */
 public abstract class CSChunk extends Chunk {
-  static protected final int _OFF=8+4;
+  static protected final int _OFF=8+4+4;
   private transient double _scale;
   private transient long _bias;
-  private transient boolean _isDecimal;
 
 
   CSChunk( byte[] bs, long bias, int scale, int szLog) {
@@ -20,28 +19,25 @@ public abstract class CSChunk extends Chunk {
     _bias = bias;
     UnsafeUtils.set8(_mem, 0, bias);
     UnsafeUtils.set4(_mem, 8, scale);
-    _isDecimal = scale < 0;
-    _scale = PrettyPrint.pow(1,Math.abs(scale));
+    _scale = PrettyPrint.pow(1,scale);
   }
-  public final double scale() { return _isDecimal?1.0/_scale:_scale; }
+  public final double scale() { return _scale; }
   @Override public final byte precision() { return (byte)Math.max(-Math.log10(scale()),0); }
 
   protected final double getD(int x, int NA){return getD(x,NA,Double.NaN);}
 
   protected final double getD(int x, int NA, double naImpute){
     if(x == NA) return naImpute;
-    double y = _bias + (double)x;
-    return _isDecimal?y/_scale:y*_scale;
+    return x == NA?naImpute:(_bias + x)*_scale;
   }
 
-  @Override public final boolean hasFloat(){ return _isDecimal; }
+  @Override public final boolean hasFloat(){ return _scale < 1; }
   @Override public final void initFromBytes () {
     _start = -1;  _cidx = -1;
     set_len(_mem.length-_OFF);
     _bias = UnsafeUtils.get8 (_mem,0);
     int x = UnsafeUtils.get4(_mem,8);;
-    _scale = PrettyPrint.pow(1,Math.abs(x));
-    _isDecimal = x < 0;
+    _scale = PrettyPrint.pow(1,x);
   }
 
   @Override protected final long at8_impl( int i ) {
@@ -63,8 +59,8 @@ public abstract class CSChunk extends Chunk {
 
   protected final int getScaledValue(double d, int NA){
     assert !Double.isNaN(d):"NaN should be handled separately";
-    int x = (int)((_isDecimal?d*_scale:(d/_scale))-_bias);
-    double d2 = _isDecimal?(x+_bias)/_scale:(x+_bias)*_scale;
+    int x = (int)(((d/_scale))-_bias);
+    double d2 = (x+_bias)*_scale;
     if( d!=d2 ) return NA;
     return x;
   }
@@ -72,8 +68,8 @@ public abstract class CSChunk extends Chunk {
   protected final int getScaledValue(float f, int NA){
     double d = (double)f;
     assert !Double.isNaN(d):"NaN should be handled separately";
-    int x = (int)((_isDecimal?d*_scale:(d/_scale))-_bias);
-    float f2 = (float)(_isDecimal?(x+_bias)/_scale:(x+_bias)*_scale);
+    int x = (int)(((d/_scale))-_bias);
+    float f2 = (float)((x+_bias)*_scale);
     if( f!=f2 ) return NA;
     return x;
   }

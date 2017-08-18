@@ -179,6 +179,8 @@ public class C2SChunkTest extends TestUtil {
 
   @Test
   public void test_precision() {
+    int scl_cntr = 0;
+    int dec_cntr = 0;
     for (final int stepsz : new int[]{1/*,7, 17, 23, 31*/}) {
       int nvals = (Short.MAX_VALUE - Short.MIN_VALUE - 1) / stepsz + ((Short.MAX_VALUE - Short.MIN_VALUE - 1) % stepsz == 0?0:1);
       int[] exponents = new int[]{/*-32,*/-16, -8, -6, -4, -2, -1, 0, 1, 2, 4, 6, 8, 16/*,32*/};
@@ -195,14 +197,16 @@ public class C2SChunkTest extends TestUtil {
           }
           assert j == nvals;
           Chunk c = nc.compress();
-          if (!(c instanceof C2SChunk))
+          if (!(c instanceof C2SChunk) && !(c instanceof CDecimalChunk))
             System.out.println("exp = " + exponent + " b = " + bias + " c = " + c.getClass().getSimpleName());
-          Assert.assertTrue(c instanceof C2SChunk);
+          if(c instanceof CDecimalChunk) dec_cntr++; else scl_cntr++;
+          Assert.assertTrue(c instanceof C2SChunk ||  c instanceof CDecimalChunk);
           for (int i = 0; i < expected.length; ++i) {
             Assert.assertEquals(expected[i], c.atd(i), 0);
           }
         }
       }
     }
+    System.out.println("There were " + dec_cntr + " decimal chunks versus " + scl_cntr + " standard c2s chunks");
   }
 }

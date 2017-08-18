@@ -1235,16 +1235,28 @@ public class NewChunk extends Chunk {
       return chunkD();
     if( fpoint ) {
       if( (int)lemin == lemin && (int)lemax == lemax ) {
-        if(leRange < 255) // Fits in scaled biased byte?
-          return new C1SChunk( bufX(lemin,xmin,C1SChunk._OFF,0),lemin,xmin);
+        if(leRange < 255) { // Fits in scaled biased byte?
+          byte [] mem = bufX(lemin, xmin, CSChunk._OFF, 0);
+          C1SChunk c1s = new C1SChunk(mem, lemin, xmin);
+          // check numeric precision
+          for(int i = 0; i < _len; ++i)
+            if(getDouble(i) != c1s.atd(i))
+              return new CDecimalChunk(mem, lemin, xmin,0);
+          return c1s;
+        }
         if(leRange < 65535) { // we use signed 2B short, add -32k to the bias!
           long bias = 32767 + lemin;
-          return new C2SChunk( bufX(bias,xmin,C2SChunk._OFF,1),bias,xmin);
+          byte [] mem = bufX(bias,xmin,CSChunk._OFF,1);
+          C2SChunk c2s =  new C2SChunk(mem,bias,xmin);
+          for(int i = 0; i < _len; ++i)
+            if(getDouble(i) != c2s.atd(i))
+              return new CDecimalChunk(mem, lemin, xmin,1);
+          return c2s;
         }
       }
       if(leRange < 4294967295l) {
         long bias = 2147483647l + lemin;
-        return new C4SChunk( bufX(bias,xmin,C4SChunk._OFF,2),bias,xmin);
+        return new CDecimalChunk(bufX(bias,xmin,C4SChunk._OFF,2),lemin,xmin,2);
       }
       return chunkD();
     } // else an integer column
