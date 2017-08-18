@@ -196,7 +196,7 @@ public class C2SChunkTest extends TestUtil {
             expected[j++] = Double.parseDouble((i + bias) + "e" + exponent);
           }
           assert j == nvals;
-          Chunk c = nc.compress();
+          Chunk c = nc.compress().deepCopy();
           if (!(c instanceof C2SChunk) && !(c instanceof CDecimalChunk))
             System.out.println("exp = " + exponent + " b = " + bias + " c = " + c.getClass().getSimpleName());
           if(c instanceof CDecimalChunk) dec_cntr++; else scl_cntr++;

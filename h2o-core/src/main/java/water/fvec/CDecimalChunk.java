@@ -11,7 +11,7 @@ public final class CDecimalChunk extends Chunk {
   static protected final int _OFF=8+4+4;
   private transient double _scale;
   private transient long _bias;
-  private transient int _valSz; // {1,2,4}
+  private transient int _valSz; // {0,1,2}
   private transient int _NA; // (C1|C2|C4)._NA
 
   CDecimalChunk( byte[] bs, long bias, int scale, int szLog) {
@@ -56,11 +56,11 @@ public final class CDecimalChunk extends Chunk {
   @Override public final boolean hasFloat(){ return true; }
   @Override public final void initFromBytes () {
     _start = -1;  _cidx = -1;
-    set_len(_mem.length-_OFF);
     _bias = UnsafeUtils.get8(_mem,0);
     int x = UnsafeUtils.get4(_mem,8);
     _scale = PrettyPrint.pow(1,-x);
     _valSz = UnsafeUtils.get4(_mem,12);
+    set_len((_mem.length-_OFF)>>_valSz);
     setNA();
   }
 

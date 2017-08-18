@@ -19,6 +19,7 @@ public abstract class CSChunk extends Chunk {
     _bias = bias;
     UnsafeUtils.set8(_mem, 0, bias);
     UnsafeUtils.set4(_mem, 8, scale);
+    UnsafeUtils.set4(_mem,12,szLog);
     _scale = PrettyPrint.pow(1,scale);
   }
   public final double scale() { return _scale; }
@@ -32,11 +33,12 @@ public abstract class CSChunk extends Chunk {
   }
 
   @Override public final boolean hasFloat(){ return _scale < 1; }
+
   @Override public final void initFromBytes () {
     _start = -1;  _cidx = -1;
-    set_len(_mem.length-_OFF);
+    set_len((_mem.length-_OFF) >> UnsafeUtils.get4(_mem,12));
     _bias = UnsafeUtils.get8 (_mem,0);
-    int x = UnsafeUtils.get4(_mem,8);;
+    int x = UnsafeUtils.get4(_mem,8);
     _scale = PrettyPrint.pow(1,x);
   }
 
