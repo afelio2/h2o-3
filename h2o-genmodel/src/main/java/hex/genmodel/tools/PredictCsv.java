@@ -11,9 +11,7 @@ import hex.genmodel.easy.prediction.ClusteringModelPrediction;
 import hex.genmodel.easy.prediction.MultinomialModelPrediction;
 import hex.genmodel.easy.prediction.RegressionModelPrediction;
 
-import java.io.BufferedWriter;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 
 /**
@@ -84,9 +82,10 @@ public class PredictCsv {
     ModelCategory category = model.getModelCategory();
     CSVReader reader = new CSVReader(new FileReader(inputCSVFileName), separator);
     String readline;
-    BufferedWriter output = new BufferedWriter(new FileWriter(outputCSVFileName));
+  //  BufferedWriter output = new BufferedWriter(new FileWriter(outputCSVFileName, false));
 
     // Emit outputCSV column names.
+/*
     switch (category) {
       case AutoEncoder:
         output.write(model.getHeader());
@@ -115,6 +114,7 @@ public class PredictCsv {
     }
     output.write("\n");
 
+*/
     // Loop over inputCSV one row at a time.
     //
     // TODO: performance of scoring can be considerably improved if instead of scoring each row at a time we passed
@@ -147,39 +147,39 @@ public class PredictCsv {
 
           case Binomial: {
             BinomialModelPrediction p = model.predictBinomial(row);
-            output.write(p.label);
-            output.write(",");
-            for (int i = 0; i < p.classProbabilities.length; i++) {
+           // output.write(p.label);
+         //   output.write(",");
+/*            for (int i = 0; i < p.classProbabilities.length; i++) {
               if (i > 0) {
                 output.write(",");
               }
               output.write(myDoubleToString(p.classProbabilities[i]));
-            }
+            }*/
             break;
           }
 
           case Multinomial: {
             MultinomialModelPrediction p = model.predictMultinomial(row);
-            output.write(p.label);
+/*            output.write(p.label);
             output.write(",");
             for (int i = 0; i < p.classProbabilities.length; i++) {
               if (i > 0) {
                 output.write(",");
               }
               output.write(myDoubleToString(p.classProbabilities[i]));
-            }
+            }*/
             break;
           }
 
           case Clustering: {
             ClusteringModelPrediction p = model.predictClustering(row);
-            output.write(myDoubleToString(p.cluster));
+ //           output.write(myDoubleToString(p.cluster));
             break;
           }
 
           case Regression: {
             RegressionModelPrediction p = model.predictRegression(row);
-            output.write(myDoubleToString(p.value));
+ //           output.write(myDoubleToString(p.value));
             break;
           }
 
@@ -187,7 +187,7 @@ public class PredictCsv {
             throw new Exception("Unknown model category " + category);
         }
 
-        output.write("\n");
+//        output.write("\n");
         lineNum++;
       }
     }
@@ -198,7 +198,7 @@ public class PredictCsv {
       System.exit(1);
     } finally {
       // Clean up.
-      output.close();
+ //     output.close();
       reader.close();
     }
   }
