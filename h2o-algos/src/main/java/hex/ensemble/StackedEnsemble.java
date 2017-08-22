@@ -57,10 +57,10 @@ public class StackedEnsemble extends ModelBuilder<StackedEnsembleModel,StackedEn
       Vec preds = aModelsPredictions.vec(2); // Predictions column names have been changed. . .
       levelOneFrame.add(aModel._key.toString(), preds);
     } else if(aModel._output.isMultinomialClassifier()){ //Multinomial
-        Vec[] preds = aModelsPredictions.vecs();
-        for(Vec v:preds) {
-            levelOneFrame.add(aModel._key.toString()+v._key, v);
-        }
+       Vec[] preds = aModelsPredictions.vecs();
+       for(Vec v : preds) {
+           levelOneFrame.add(aModel._key.toString(), v);
+       }
     } else if (aModel._output.isAutoencoder()) {
       throw new H2OIllegalArgumentException("Don't yet know how to stack autoencoders: " + aModel._key);
     } else if (!aModel._output.isSupervised()) {
