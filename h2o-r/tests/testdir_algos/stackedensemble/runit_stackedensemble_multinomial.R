@@ -88,11 +88,11 @@ stackedensemble.multinomial.test <- function() {
     print("StackedEnsemble 1 of 2")
     # Train a stacked ensemble using the GBM and GLM above
     stack <- h2o.stackedEnsemble(x = x,
-    y = y,
-    training_frame = train,
-    validation_frame = test,  #also test that validation_frame is working
-    model_id = "my_ensemble_multinomial",
-    base_models = list(my_gbm@model_id, my_rf@model_id, my_xrf@model_id))
+                                y = y,
+                                training_frame = train,
+                                validation_frame = test,  #also test that validation_frame is working
+                                model_id = "my_ensemble_multinomial",
+                                base_models = list(my_gbm@model_id, my_rf@model_id, my_xrf@model_id))
 
     # Check that prediction works
     pred <- h2o.predict(stack, newdata = test)
@@ -112,14 +112,19 @@ stackedensemble.multinomial.test <- function() {
     perf_stack_train <- h2o.performance(stack)
     perf_stack_test <- h2o.performance(stack, newdata = test)
 
+    print("Perf on Train for 1st Stacked Ensemble")
+    print(perf_stack_train)
+    print("Perf on Test for 1st Stacked Ensemble")
+    print(perf_stack_test)
+
     # And again:
     print("StackedEnsemble 2 of 2")
     stack <- h2o.stackedEnsemble(x = x,
-    y = y,
-    training_frame = train,
-    validation_frame = test,  #also test that validation_frame is working
-    model_id = "my_ensemble_multinomial",
-    base_models = list(my_gbm@model_id, my_rf@model_id, my_xrf@model_id))
+                                y = y,
+                                training_frame = train,
+                                validation_frame = test,  #also test that validation_frame is working
+                                model_id = "my_ensemble_multinomial",
+                                base_models = list(my_gbm@model_id, my_rf@model_id, my_xrf@model_id))
 
     pred <- h2o.predict(stack, newdata = test)
     expect_equal(nrow(pred), nrow(test))
@@ -127,8 +132,10 @@ stackedensemble.multinomial.test <- function() {
 
     perf_stack_train <- h2o.performance(stack)
     perf_stack_test <- h2o.performance(stack, newdata = test)
-
-
+    print("Perf on Train for 2nd Stacked Ensemble")
+    print(perf_stack_train)
+    print("Perf on Test for 2nd Stacked Ensemble")
+    print(perf_stack_test)
 
     # Training mean_per_class_error for each base learner
     baselearner_best_mean_per_class_error_train <- min(h2o.mean_per_class_error(perf_gbm_train), h2o.mean_per_class_error(perf_rf_train), h2o.mean_per_class_error(perf_xrf_train))
@@ -143,7 +150,7 @@ stackedensemble.multinomial.test <- function() {
     stack_mean_per_class_error_test <- h2o.mean_per_class_error(perf_stack_test)
     print(sprintf("Best Base-learner Test mean_per_class_error:  %s", baselearner_best_mean_per_class_error_test))
     print(sprintf("Ensemble Test mean_per_class_error:  %s", stack_mean_per_class_error_test))
-    expect_equal(TRUE, stack_mean_per_class_error_test < baselearner_best_mean_per_class_error_test)
+    expect_equal(TRUE, stack_mean_per_class_error_test <= baselearner_best_mean_per_class_error_test)
 
     # Check that passing `test` as a validation_frame
     # produces the same metrics as h2o.performance(stack, test)

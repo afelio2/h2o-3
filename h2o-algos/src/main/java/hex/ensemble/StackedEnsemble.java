@@ -148,12 +148,13 @@ public class StackedEnsemble extends ModelBuilder<StackedEnsembleModel,StackedEn
         if(!aModel._output.isMultinomialClassifier()){
             baseModelPredictions.add(aFrame);
         }else {
-            //Remove first column of aFrame if multinomial as it contains the actual predictions
+            //Create temp `multFrame` that will hold multinomial class predictions to avoid mutating original
+            //class predictions from the model
             Frame multFrame = new Frame(aFrame);
-            multFrame.remove("predict").remove();
             DKV.put(multFrame);
+            multFrame.remove("predict").remove(); //Remove `predict` since it is not needed for stacked ensembles
             baseModelPredictions.add(multFrame);
-            DKV.remove(multFrame._key);
+            DKV.remove(multFrame._key); //Cleanup
         }
       }
 
