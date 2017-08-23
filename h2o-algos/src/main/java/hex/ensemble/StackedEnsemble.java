@@ -57,10 +57,7 @@ public class StackedEnsemble extends ModelBuilder<StackedEnsembleModel,StackedEn
       Vec preds = aModelsPredictions.vec(2); // Predictions column names have been changed. . .
       levelOneFrame.add(aModel._key.toString(), preds);
     } else if(aModel._output.isMultinomialClassifier()){ //Multinomial
-       Vec[] preds = aModelsPredictions.vecs();
-       for(Vec v : preds) {
-           levelOneFrame.add(aModel._key.toString(), v);
-       }
+      levelOneFrame.add(aModelsPredictions);
     } else if (aModel._output.isAutoencoder()) {
       throw new H2OIllegalArgumentException("Don't yet know how to stack autoencoders: " + aModel._key);
     } else if (!aModel._output.isSupervised()) {
@@ -152,7 +149,7 @@ public class StackedEnsemble extends ModelBuilder<StackedEnsembleModel,StackedEn
             baseModelPredictions.add(aFrame);
         }else {
             //Remove first column of aFrame if multinomial as it contains the actual predictions
-            aFrame.remove("predict");
+            aFrame.remove("predict").remove();
             baseModelPredictions.add(aFrame);
         }
       }
@@ -235,7 +232,7 @@ public class StackedEnsemble extends ModelBuilder<StackedEnsembleModel,StackedEn
       }else if(_model.modelCategory == ModelCategory.Multinomial){
           metaBuilder._parms._family = GLMModel.GLMParameters.Family.multinomial;
       }else{
-          throw new H2OIllegalArgumentException("Family " + _model.modelCategory + "is not supported.");
+          throw new H2OIllegalArgumentException("Family " + _model.modelCategory + "  is not supported.");
       }
 
       metaBuilder.init(false);

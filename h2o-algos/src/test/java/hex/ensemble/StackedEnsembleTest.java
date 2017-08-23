@@ -75,7 +75,7 @@ public class StackedEnsembleTest extends TestUtil {
         // Multinomial tests
         basicEnsemble("./smalldata/logreg/prostate.csv",
                 null,
-                new StackedEnsembleTest.PrepData() { int prep(Frame fr) { fr.remove("ID").remove(); return fr.find("CAPSULE"); }
+                new StackedEnsembleTest.PrepData() { int prep(Frame fr) { fr.remove("ID").remove(); return fr.find("RACE"); }
                 },
                 false, DistributionFamily.multinomial);
 
@@ -84,7 +84,7 @@ public class StackedEnsembleTest extends TestUtil {
                 new StackedEnsembleTest.PrepData() { int prep(Frame fr) { fr.remove("name").remove(); return fr.find("cylinders"); }
                 },
                 false, DistributionFamily.multinomial);
-//
+
         basicEnsemble("./smalldata/iris/iris_wheader.csv",
                 null,
                 new StackedEnsembleTest.PrepData() { int prep(Frame fr) {return fr.find("class"); }
