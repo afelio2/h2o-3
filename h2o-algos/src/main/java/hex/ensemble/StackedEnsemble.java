@@ -149,8 +149,11 @@ public class StackedEnsemble extends ModelBuilder<StackedEnsembleModel,StackedEn
             baseModelPredictions.add(aFrame);
         }else {
             //Remove first column of aFrame if multinomial as it contains the actual predictions
-            aFrame.remove("predict").remove();
-            baseModelPredictions.add(aFrame);
+            Frame multFrame = new Frame(aFrame);
+            multFrame.remove("predict").remove();
+            DKV.put(multFrame);
+            baseModelPredictions.add(multFrame);
+            DKV.remove(multFrame._key);
         }
       }
 
